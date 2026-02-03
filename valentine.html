@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You 💖</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='16'>❤️</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(#ffc0cb,#ff9acb);
+    min-height:100vh;
+    overflow:hidden;
+}
+
+/* ---------- SCREENS ---------- */
+.screen{
+    display:none;
+    min-height:100vh;
+    padding:24px;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+}
+.active{display:flex}
+
+/* ---------- TEXT ---------- */
+h1{
+    font-family:'Pacifico',cursive;
+    color:deeppink;
+    margin-bottom:12px;
+}
+h2{
+    color:#b30059;
+    margin-bottom:10px;
+}
+p{
+    max-width:520px;
+    line-height:1.6;
+    margin-bottom:14px;
+}
+
+/* ---------- BUTTONS ---------- */
+button{
+    padding:14px 28px;
+    border:none;
+    border-radius:16px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.25s;
+    margin:8px;
+}
+button:hover{transform:scale(1.08)}
+button:active{transform:scale(.92)}
+.primary{background:hotpink;color:white}
+.secondary{
+    background:white;
+    color:hotpink;
+    border:2px solid hotpink;
+}
+
+/* Allow scrolling only on letter page */
+#letter {
+    overflow-y: auto;
+}
+
+#letter::-webkit-scrollbar {
+    width: 6px;
+}
+
+#letter::-webkit-scrollbar-thumb {
+    background: hotpink;
+    border-radius: 10px;
+}
+
+#loveLetterContainer {
+    max-height: 70vh;        /* important */
+    overflow-y: auto;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+}
+
+#loveLetter {
+    line-height: 1.7;
+    font-size: 16px;
+    color: #b30059;
+    white-space: normal;
+}
+
+
+/* ---------- GAME 1 ---------- */
+.box{
+    width:260px;
+    height:260px;
+    border:4px dashed hotpink;
+    border-radius:20px;
+    position:relative;
+}
+.heart{
+    position:absolute;
+    font-size:42px;
+    left:110px;
+    top:110px;
+    cursor:grab;
+    touch-action:none;
+}
+
+/* ---------- FLOATING HEARTS ---------- */
+.floating-heart{
+    position:fixed;
+    bottom:-30px;
+    font-size:20px;
+    animation:floatHeart 6s linear infinite;
+    opacity:.8;
+    z-index:1;
+}
+@keyframes floatHeart{
+    from{transform:translateY(0) scale(1);opacity:0}
+    10%{opacity:1}
+    to{transform:translateY(-110vh) scale(1.4);opacity:0}
+}
+
+/* ---------- CURSOR TRAIL ---------- */
+.cursor-heart{
+    position:fixed;
+    pointer-events:none;
+    font-size:16px;
+    animation:trailFade 1s ease forwards;
+    z-index:9999;
+}
+@keyframes trailFade{
+    to{opacity:0;transform:scale(1.6) translateY(-20px)}
+}
+
+/* ---------- VALENTINE CARD ---------- */
+.card{
+    background:rgba(255,255,255,.35);
+    padding:28px;
+    border-radius:22px;
+    animation:pop .5s ease;
+}
+@keyframes pop{
+    from{transform:scale(.8);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+
+/* ---------- NO BUTTON ---------- */
+#no{
+    position:fixed;
+    background:white;
+    color:hotpink;
+    display:none;
+    z-index:20;
+}
+
+/* ---------- YAY IMAGE ---------- */
+.yay-img{
+    width:240px;
+    max-width:85%;
+    border-radius:22px;
+    margin:16px 0;
+}
+
+/* ---------- GALLERY ---------- */
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+    gap:12px;
+    width:100%;
+    max-width:720px;
+}
+.gallery img{
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    border-radius:14px;
+    cursor:pointer;
+}
+
+/* ---------- LIGHTBOX ---------- */
+.lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.95);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:10000;
+}
+.lightbox img{
+    max-width:95%;
+    max-height:85%;
+    border-radius:16px;
+}
+.lightbox button{
+    position:absolute;
+    top:20px;
+    left:20px;
+    background:white;
+    color:black;
+    padding:8px 14px;
+    border-radius:12px;
+    font-size:14px;
+}
+
+/* ---------- CONFETTI ---------- */
+.confetti{
+    position:fixed;
+    width:10px;
+    height:10px;
+    animation:confettiFall 2s ease forwards;
+    z-index:9999;
+}
+@keyframes confettiFall{
+    to{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop>
+    <source src="love.mp3">
+</audio>
+
+<!-- GAME 1 -->
+<div class="screen active" id="g1">
+<h1>Game 1 💕</h1>
+<p>Drag the heart out of the box</p>
+<div class="box" id="box">
+    <div class="heart" id="dragHeart">💖</div>
+</div>
+</div>
+
+<!-- GAME 2 -->
+<div class="screen" id="g2">
+<h1>Game 2 💓</h1>
+<p>Tap the heart 5 times</p>
+<div id="tapHeart" style="font-size:60px">💗</div>
+<p id="tapCount">0 / 5</p>
+</div>
+
+<!-- GAME 3 -->
+<div class="screen" id="g3">
+<h1>Game 3 🎁</h1>
+<p id="waitText">Wait for the magic… 5</p>
+</div>
+
+<!-- VALENTINE -->
+<div class="screen" id="valentine">
+<div class="card">
+<h1>Will you be my Valentine? 💘</h1>
+<p>Samanvitha (my muduu hendthii 💕)</p>
+<button class="primary" id="yes">Yes 💖</button>
+</div>
+</div>
+
+<button id="no">No 💔</button>
+
+<!-- YAY -->
+<div class="screen" id="final">
+<h1>YAYYYYY 😭💖</h1>
+<h2>You’re stuck with me now 😌</h2>
+
+<img src="yay.jpeg" class="yay-img">
+
+<p>You made it through everything just to reach here 🥹💕</p>
+
+<button class="primary" id="surprise1">Surprise 💝</button>
+<button class="primary" id="surprise2">Surprise Two 📸</button>
+</div>
+
+<!-- LETTER -->
+<div class="screen" id="letter">
+<h1>💌 Surprise 💌</h1>
+ <div id="loveLetterContainer">
+       <div id="loveLetter" style="
+    max-width:600px;
+    line-height:1.7;
+    font-size:16px;
+    color:#b30059;
+"></div>
+    </div>
+
+
+<button class="secondary" onclick="startTypewriter()">
+💌 Read slowly
+</button>
+
+<button class="secondary" onclick="goBack()">← Back</button>
+</div>
+
+<!-- GALLERY -->
+<div class="screen" id="gallery">
+<h1>Our Memories 📸</h1>
+
+<div class="gallery">
+<img src="photo1.jpg" onclick="openLightbox(this)">
+<img src="photo2.jpg" onclick="openLightbox(this)">
+<img src="photo3.jpg" onclick="openLightbox(this)">
+<img src="photo4.jpg" onclick="openLightbox(this)">
+<img src="photo5.jpeg" onclick="openLightbox(this)">
+<img src="photo6.jpeg" onclick="openLightbox(this)">
+<img src="photo7.jpeg" onclick="openLightbox(this)">
+<img src="photo8.jpeg" onclick="openLightbox(this)">
+<img src="photo9.jpg" onclick="openLightbox(this)">
+<img src="photo10.jpeg" onclick="openLightbox(this)">
+<img src="photo11.jpeg" onclick="openLightbox(this)">
+<img src="photo12.jpeg" onclick="openLightbox(this)">
+</div>
+
+<button class="secondary" onclick="goBack()">← Back</button>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+    <button onclick="closeLightbox()">← Back</button>
+    <img id="lightboxImg">
+</div>
+
+<script>
+
+    
+
+    const letterText = `Hey my Kulliii ❤️,
+
+I don’t even know where to begin, because there are so many feelings I carry for you every single day.
+
+First of all… thank you.
+Thank you for choosing me. Thank you for saying yes. Thank you for trusting me with your heart. I’m genuinely so grateful to have you in my life, and I never ever want to take that for granted.
+
+YAYYYYY 😭💖
+You’re officially stuck with me now — no escape, no refunds, no returns 😌
+But okieeee… don’t worry, I promise to stick with you even harder.
+
+I still can’t believe how lucky I am. Out of everyone in this world, I get YOU.
+Your smile, your kindness, the way you make everything feel lighter — you’re honestly the cutest person ever, inside and out. My Kulliii is truly one of a kind 🥹💕
+
+Thank you for accepting my proposal and for being my Valentine 💘
+I feel so proud, so happy, and so thankful knowing I get to call you my person.
+
+I feel incredibly lucky to have you as my wifey one day 😌
+And I promise to be the best hubby — loving you, supporting you, annoying you a little, and choosing you every single day.
+
+With you, I don’t just feel happy — I feel safe, appreciated, and complete.
+You’re my comfort, my favorite thought, my biggest blessing, and my forever.
+
+So yeah… okieeee 🥰
+This is me saying: I choose you.
+Today. Tomorrow. Always. 💖
+
+Advanced Valentine’s Day, my Kulliii 🥹💘
+Forever yours ❤️`;
+
+let i = 0;
+const speed = 40; // typing speed (lower = faster)
+
+function startTypewriter() {
+    const el = document.getElementById("loveLetter");
+    if (i < letterText.length) {
+        el.innerHTML += letterText[i] === "\n" ? "<br>" : letterText[i];
+        i++;
+        setTimeout(startTypewriter, speed);
+    }
+}
+
+
+/* MUSIC */
+document.addEventListener("click",()=>music.play(),{once:true});
+
+/* CURSOR HEART TRAIL */
+function spawnCursorHeart(x,y){
+ const h=document.createElement("div");
+ h.className="cursor-heart";
+ h.textContent="💖";
+ h.style.left=x+"px";
+ h.style.top=y+"px";
+ document.body.appendChild(h);
+ setTimeout(()=>h.remove(),1000);
+}
+document.addEventListener("mousemove",e=>spawnCursorHeart(e.clientX,e.clientY));
+document.addEventListener("touchmove",e=>{
+ if(e.touches[0])spawnCursorHeart(e.touches[0].clientX,e.touches[0].clientY);
+});
+
+/* FLOATING HEARTS */
+let heartInterval;
+function startFloatingHearts(){
+ stopFloatingHearts();
+ heartInterval=setInterval(()=>{
+  const h=document.createElement("div");
+  h.className="floating-heart";
+  h.textContent="💖";
+  h.style.left=Math.random()*100+"vw";
+  h.style.animationDuration=4+Math.random()*4+"s";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),7000);
+ },400);
+}
+function stopFloatingHearts(){clearInterval(heartInterval);}
+
+/* GAME 1 */
+const heart=document.getElementById("dragHeart");
+const box=document.getElementById("box");
+let dragging=false;
+
+heart.addEventListener("pointerdown",()=>dragging=true);
+document.addEventListener("pointerup",()=>{
+ dragging=false;
+ const h=heart.getBoundingClientRect();
+ const b=box.getBoundingClientRect();
+ if(h.left<b.left||h.top<b.top||h.right>b.right||h.bottom>b.bottom){
+  g1.classList.remove("active");
+  g2.classList.add("active");
+ }else{
+  heart.style.left="110px";
+  heart.style.top="110px";
+ }
+});
+document.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ const b=box.getBoundingClientRect();
+ heart.style.left=e.clientX-b.left-20+"px";
+ heart.style.top=e.clientY-b.top-20+"px";
+});
+
+/* GAME 2 */
+let taps=0;
+tapHeart.onclick=()=>{
+ taps++;
+ tapCount.textContent=`${taps} / 5`;
+ if(taps===5){
+  g2.classList.remove("active");
+  g3.classList.add("active");
+  let c=5;
+  const i=setInterval(()=>{
+   waitText.textContent=`Wait for the magic… ${--c}`;
+   if(c===0){
+    clearInterval(i);
+    g3.classList.remove("active");
+    valentine.classList.add("active");
+    showNo();
+    startFloatingHearts();
+   }
+  },1000);
+ }
+};
+
+/* NO BUTTON */
+function showNo(){
+ no.style.display="block";
+ moveNo();
+}
+function hideNo(){no.style.display="none";}
+function moveNo(){
+ no.style.left=Math.random()*(innerWidth-100)+"px";
+ no.style.top=Math.random()*(innerHeight-50)+"px";
+}
+no.addEventListener("mouseenter",moveNo);
+no.addEventListener("click",moveNo);
+no.addEventListener("touchstart",moveNo);
+
+/* CONFETTI */
+function launchConfetti(){
+ for(let i=0;i<200;i++){
+  const c=document.createElement("div");
+  c.className="confetti";
+  c.style.left=Math.random()*100+"vw";
+  c.style.top="-10px";
+  c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+  c.style.animationDuration=1.5+Math.random()+"s";
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(),2000);
+ }
+}
+
+/* YES */
+yes.onclick=()=>{
+ stopFloatingHearts();
+ hideNo();
+ launchConfetti();
+ valentine.classList.remove("active");
+ final.classList.add("active");
+};
+
+
+
+
+/* NAVIGATION */
+function goBack(){
+ gallery.classList.remove("active");
+ letter.classList.remove("active");
+ final.classList.add("active");
+}
+surprise1.onclick=()=>{final.classList.remove("active");letter.classList.add("active");};
+surprise2.onclick=()=>{final.classList.remove("active");gallery.classList.add("active");};
+
+/* LIGHTBOX */
+function openLightbox(img){
+ lightboxImg.src=img.src;
+ lightbox.style.display="flex";
+}
+function closeLightbox(){
+ lightbox.style.display="none";
+}
+</script>
+
+</body>
+</html>
